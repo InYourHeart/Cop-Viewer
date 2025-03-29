@@ -4,6 +4,10 @@ namespace CoP_Viewer
 {
     public partial class MainForm : Form
     {
+        //Constants
+        private const int MIN_HEIGHT = 720;
+        private const int MIN_WIDTH = 1280;
+
         //UI elements
         private MapView mapView;
         private InfoView infoView;
@@ -28,14 +32,19 @@ namespace CoP_Viewer
             this.Controls.Add(infoView);
 
             politicalMapButton = new Button();
+            politicalMapButton.Text = "Political";
             politicalMapButton.Click += Change_Map_To_Political;
             terrainMapButton = new Button();
+            terrainMapButton.Text = "Terrain";
             terrainMapButton.Click += Change_Map_To_Terrain;
             regionsMapButton = new Button();
+            regionsMapButton.Text = "Regions";
             regionsMapButton.Click += Change_Map_To_Regions;
-             occupationsMapButton = new Button();
+            occupationsMapButton = new Button();
+            occupationsMapButton.Text = "Occupations";
             occupationsMapButton.Click += Change_Map_To_Occupations;
-             devastationMapButton = new Button();
+            devastationMapButton = new Button();
+            devastationMapButton.Text = "Devastation";
             devastationMapButton.Click += Change_Map_To_Devastation;
 
             this.Controls.Add(politicalMapButton);
@@ -88,10 +97,10 @@ namespace CoP_Viewer
 
         private void ResizeMapButtons()
         {
-            int h = 50;
-            int w = 100;
-            int pad = 20;
-            int newPosX = (int)(this.Height * 0.025) + (int)(this.ClientRectangle.Width * 0.70) + pad;
+            int pad = 10;
+            int h = 30;
+            int w = (int)(this.ClientRectangle.Width * 0.25 / 5);
+            int newPosX = (int)(this.Width - (int)(this.ClientRectangle.Width * 0.25) - this.Height * 0.05);
             int newPosY = (int)(this.Height * 0.025) + (int)(this.ClientRectangle.Height * 0.45) + pad;
 
             politicalMapButton.Height = h;
@@ -99,16 +108,16 @@ namespace CoP_Viewer
             politicalMapButton.Location = new Point(newPosX, newPosY);
             terrainMapButton.Height = h;
             terrainMapButton.Width = w;
-            terrainMapButton.Location = new Point(newPosX + w + pad, newPosY);
+            terrainMapButton.Location = new Point(newPosX + w, newPosY);
             regionsMapButton.Height = h;
             regionsMapButton.Width = w;
-            regionsMapButton.Location = new Point(newPosX + w * 2 + pad, newPosY);
+            regionsMapButton.Location = new Point(newPosX + w * 2, newPosY);
             occupationsMapButton.Height = h;
             occupationsMapButton.Width = w;
-            occupationsMapButton.Location = new Point(newPosX + w * 3 + pad, newPosY);
+            occupationsMapButton.Location = new Point(newPosX + w * 3, newPosY);
             devastationMapButton.Height = h;
             devastationMapButton.Width = w;
-            devastationMapButton.Location = new Point(newPosX + w * 4 + pad, newPosY);
+            devastationMapButton.Location = new Point(newPosX + w * 4, newPosY);
         }
 
         private void ResizeMapView()

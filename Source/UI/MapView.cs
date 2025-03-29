@@ -1,5 +1,6 @@
 ﻿using CoP_Viewer.Source.Controller;
 using CoP_Viewer.Source.Util;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -58,6 +59,8 @@ namespace CoP_Viewer.Source.UI
 
         public MapView()
         {
+            this.BackColor = Color.White;
+
             //Storing copies of the images' pixel arrays for later accesses
             politicalImagePixels = PixelHandler.getPixels(Properties.Resources.PoliticalMap);
             terrainImagePixels = PixelHandler.getPixels(Properties.Resources.TerrainMap);
@@ -144,13 +147,14 @@ namespace CoP_Viewer.Source.UI
             //Conditions to avoid to proceed further.
             if (backgroundMapImage == null) { return; }
 
-            Graphics g = e.Graphics;
-
-            g.CompositingMode = CompositingMode.SourceCopy;
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
-
             int curImageSizeX = (int)((float)this.initialHeight * mapImageInnerRatio * zoomFac);
             int curImageSizeY = (int)((float)this.initialHeight * zoomFac);
+
+            Graphics g = e.Graphics;
+
+            g.CompositingMode = CompositingMode.SourceOver;
+            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+
 
             g.DrawImage(backgroundMapImage,
                         curImageX,
@@ -160,8 +164,6 @@ namespace CoP_Viewer.Source.UI
 
             if (!overlayKey.Equals(""))
             {
-                overlayMapImage.MakeTransparent();
-
                 g.DrawImage(overlayMapImage,
                             curImageX,
                             curImageY,
@@ -169,6 +171,15 @@ namespace CoP_Viewer.Source.UI
                             curImageSizeY);
             }
 
+            //Map outline
+            /*g.DrawRectangle(new Pen(Color.Black, 0.025f * zoomFac),
+                curImageX - 1 * zoomFac,
+                curImageY - 1 * zoomFac,
+                curImageSizeX + 1 * zoomFac,
+                curImageSizeY + 1 * zoomFac);*/
+
+
+            //Map view outline
             g.DrawRectangle(new Pen(Color.Black),
                             0,
                             0,
