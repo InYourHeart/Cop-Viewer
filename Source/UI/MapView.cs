@@ -156,6 +156,17 @@ namespace CoP_Viewer.Source.UI
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
 
 
+            float pixelSize = curImageSizeX / backgroundMapImage.Width;
+            Pen outlinePen = new Pen(Color.Black);
+            outlinePen.Width = 0.025f * zoomFac;
+
+            //Map outline
+            g.DrawRectangle(new Pen(Color.Black, pixelSize * 2),
+                curImageX - pixelSize / 3,
+                curImageY - pixelSize / 3,
+                curImageSizeX,
+                curImageSizeY);
+
             g.DrawImage(backgroundMapImage,
                         curImageX,
                         curImageY,
@@ -171,14 +182,6 @@ namespace CoP_Viewer.Source.UI
                             curImageSizeY);
             }
 
-            //Map outline
-            /*g.DrawRectangle(new Pen(Color.Black, 0.025f * zoomFac),
-                curImageX - 1 * zoomFac,
-                curImageY - 1 * zoomFac,
-                curImageSizeX + 1 * zoomFac,
-                curImageSizeY + 1 * zoomFac);*/
-
-
             //Map view outline
             g.DrawRectangle(new Pen(Color.Black),
                             0,
@@ -186,25 +189,18 @@ namespace CoP_Viewer.Source.UI
                             this.Width - 1,
                             this.Height - 1);
 
-            if (selectedPixelIndex != null)
+            if (selectedPixelIndex != null && pixelSize >= 1)
             {
-                float pixelSize = curImageSizeX / backgroundMapImage.Width;
-
-                if (pixelSize >= 1)
-                {
                     Point onScreenIndex = getOnScreenIndex(selectedPixelIndex.Value);
 
-                    Pen pen = new Pen(Color.Red);
-                    pen.Width = 0.025f * zoomFac;
+                    Pen selectionPen = new Pen(Color.Red);
+                    selectionPen.Width = 0.025f * zoomFac;
 
-                    g.DrawRectangle(pen,
+                    g.DrawRectangle(selectionPen,
                             onScreenIndex.X,
                             onScreenIndex.Y,
                             (int)Math.Round(pixelSize),
                             (int)Math.Round(pixelSize));
-                }
-
-
             }
         }
 
