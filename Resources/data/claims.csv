@@ -7,7 +7,7 @@ Kingdom of Sardinia;BEDAAA
 Republic of Genoa;E3857D
 Batavian Republic;B194B2
 Swiss Confederation;B9978E
-Austria;F8B972
+Austria;F7ECE1
 Venice;F18BA3
 Parma;9CB5DD
 Modena and Reggio;99CDA6
@@ -17,7 +17,7 @@ Piombino;D7E78E
 Naples;9E727F
 San Marino;DFA951
 Corsica;889A8C
-Bavaria;759355
+Electorate Bavaria;759355
 Prussia;A1C1D6
 Electorate of Saxony;E3998C
 Principality of Schwarzburg;8D7995
@@ -96,19 +96,20 @@ Prince-Bishopric of Augsburg;A798C1
 Free Imperial City of Memmingen;CD2727
 Free Imperial City of Leutkirch im Allg?u;D42727
 Free Imperial City of Lindau;D12F27
+Free Imperial City of Wangen;9E1F23
 Free Imperial City of Buchhorn;D13E27
 Free Imperial City of Ravensburg;AA3E27
 Imperial Abbey of Weingarten;DD7DA5
 Lordship of K?nigsegg;667675
 Principality of Liechtenstein;BD818D
-Free Imperial City of Buchau;93788F
+Free Imperial City of Buchau;91283D
 Imperial Abbey of Buchau;F8618F
 Free Imperial City of Schw?bisch Gm?nd;8C2B27
 Free Imperial City of Aalen;8F2F27
 Imperial Abbey of Baindt;9F7DA5
 Free Imperial City of Biberach an der Ri?;D44E27
 Lordship of Bonndorf;807DA5
-Free Imperial City of Bopfingen;8F2F3E
+Free Imperial City of N?rdlingen;8F2F3E
 Free Imperial City of Dinkelsb?hl;B62F3E
 Imperial Abbey of Elchingen;CD74C1
 Imperial Abbey of Ellwangen;CC94C4
@@ -123,9 +124,9 @@ Imperial Abbey of Gutenzell;CD7CC1
 County of Hohengeroldseck;89A06D
 Imperial Abbey of Irsee;CD9880
 Free Imperial City of Isny;D42784
-Imperial Abbey of Kaiserheim;BA98C1
+Imperial Abbey of Kaisheim;BA98C1
 Landgraviate of Klettgau;A79F59
-Teutonic Order;89C99A
+Teutonic Order;494949
 Imperial Abbey of Marchtal;9F6588
 County of Oettingen;A7AD96
 Imperial Abbey of Neresheim;CCAEC4
@@ -135,7 +136,7 @@ Free Imperial City of Pfullendorf;C23A3A
 Free Imperial City of ?berlingen;AA3E4E
 Imperial Abbey of Salem;D97D65
 Free Imperial City of Reutlingen;AA2723
-Imperial Abbey of Reggenburg;CD748F
+Imperial Abbey of Reggenburg;864C96
 Imperial Abbey of Rot an der Rot;CD8C69
 Prince-Bishopric of Eichst?tt;CD8CA7
 Prince-Bishopric of Strasbourg;8F4E55
@@ -156,7 +157,7 @@ County of Erbach;935288
 County of Wertheim;556152
 County of Rieneck;9B9F52
 Free Imperial City of Frankfurt;FF0000
-Principality of Nassau-Diez;DB9078
+Principality of Nassau-Diez;D8613C
 Landgraviate of Hesse-Kassel;94A9B7
 Electorate of Trier;E8AE55
 Free Imperial City of Friedberg;931800
@@ -190,3 +191,33 @@ County of Oldenburg;A39C39
 Prince-Bishopric of Osnabr?ck;C79FF9
 County of Steinfurt;F76440
 Prince-Bishopric of M?nster;BACC9B
+Free Imperial City of Kehl;AD3B29
+Free Imperial City of Zell am Harmersbach;BC404A
+?hningen Monastery;D3A7C6
+Lordship of Enzberg;F89B72
+Imperial Nunnery of Rottenm?nster;C499DB
+Lordship of Eglofs;4DA897
+Imperial Abbey of Weissenau;9E5A76
+Princes of Thurn and Taxis;7F8DF4
+Imperial Abbey of Schussenried;F791DA
+Imperial Abbey of Zwiefalten;CA90CE
+Princes of Speth;DBBC9B
+Imperial Abbey of Heggbach;FF9BF1
+Buxheim Monastery;D3675D
+Lordship of Kellm?nz on the Iller;E5DB97
+Imperial Abbey of Ottobeuren;CC5DAC
+Imperial Abbey of Wettenhausen;6F5DA5
+Lordship of Rechberg;5FB4BF
+von Jungkenn ;61ADA8
+von G?ltlingen ;64AEC9
+Free Imperial City of Weil;FF5659
+von Gemmingen;BCE5D7
+Free Imperial City of Wimpfen;DB3939
+Lordship of Bleinstein;6871A0
+County of Sternstein;D2E053
+Imperial Abbey of St. Emmeram;C12ABF
+County of Ortenburg;3A2ABF
+Landgraviate of Hesse-Rotenburg;FF8754
+Imperial Abbey of Werden-Helmstedt;DDA7D6
+Free Imperial City of Essen;DB6B6B
+Princely Abbey of Corvey;BE618C

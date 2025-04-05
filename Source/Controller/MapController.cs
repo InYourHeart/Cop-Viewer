@@ -1,8 +1,8 @@
 ﻿using CoP_Viewer.Source.Model;
 using CoP_Viewer.Source.UI;
 using CoP_Viewer.Source.Util;
-using System.Globalization;
-using System.Security.Claims;
+using System;
+using System.Collections;
 using Claim = CoP_Viewer.Source.Model.Claim;
 using Region = CoP_Viewer.Source.Model.Region;
 
@@ -17,6 +17,11 @@ namespace CoP_Viewer.Source.Controller
         private Dictionary<int, Terrain> terrainList;
         private Dictionary<int, City> cityList;
         private Dictionary<int, Region> regionList;
+
+        public const string CLAIMS_KEY = "claims_data";
+        public const string CITIES_KEY = "cities_data";
+        public const string REGIONS_KEY = "regions_data";
+        public const string TERRAINS_KEY = "terrains_data";
 
         public MapController(MapView mapView, InfoView infoView)
         {
@@ -40,7 +45,7 @@ namespace CoP_Viewer.Source.Controller
 
         public void loadClaimList()
         {
-            foreach (String[] claimData in CsvHandler.getValuesFromCSV(Properties.Resources.ClaimData))
+            foreach (String[] claimData in CsvHandler.getValuesFromCSV(System.Configuration.ConfigurationManager.AppSettings[CLAIMS_KEY]))
             {
                 String claimName = claimData[0];
                 String claimHex = claimData[1];
@@ -51,7 +56,7 @@ namespace CoP_Viewer.Source.Controller
 
         public void loadTerrainList()
         {
-            foreach (String[] terrainData in CsvHandler.getValuesFromCSV(Properties.Resources.TerrainData))
+            foreach (String[] terrainData in CsvHandler.getValuesFromCSV(System.Configuration.ConfigurationManager.AppSettings[TERRAINS_KEY]))
             {
                 String terrainName = terrainData[0];
                 String terrainHex = terrainData[1];
@@ -63,18 +68,44 @@ namespace CoP_Viewer.Source.Controller
 
         public void loadCityList()
         {
-            foreach (String[] cityData in CsvHandler.getValuesFromCSV(Properties.Resources.CityData))
-            {
-                String cityName = cityData[0];
-                String cityHex = cityData[2];
+            int lineNum = 0;
 
-                cityList.Add(PixelHandler.hexToInt(cityHex), new City(cityName));
+            foreach (String[] cityData in CsvHandler.getValuesFromCSV(System.Configuration.ConfigurationManager.AppSettings[CITIES_KEY]))
+            {
+                lineNum++;
+
+                String cityName = cityData[0];
+                String[] xCoords = cityData[1].Split(",");
+                String[] yCoords = cityData[2].Split(",");
+
+                if (xCoords[0].Equals(""))
+                {
+                    Logger.logError("City coordinate data is empty - Line " + lineNum);
+                    continue;
+                }
+
+                //Add an entry for every set of coordinates
+                for (int i = 0; i < xCoords.Length; i++)
+                {
+                    try
+                    {
+                        int index = PixelHandler.getIndex(int.Parse(xCoords[i]), int.Parse(yCoords[i]), mapView.getWidth());
+
+                        cityList.Add(index, new City(cityName));
+                    } catch (ArgumentNullException)
+                    {
+                        Logger.logError("City coordinate data is null - Line " + lineNum);
+                    }
+                    catch (FormatException) {
+                        Logger.logError("City coordinate data is not a number - Line " + lineNum);
+                    }
+                }
             }
         }
 
         public void loadRegionList()
         {
-            foreach (String[] regionData in CsvHandler.getValuesFromCSV(Properties.Resources.RegionData))
+            foreach (String[] regionData in CsvHandler.getValuesFromCSV(System.Configuration.ConfigurationManager.AppSettings[REGIONS_KEY]))
             {
                 String regionName = regionData[0];
                 String regionHex = regionData[1];
@@ -141,15 +172,82 @@ namespace CoP_Viewer.Source.Controller
 
                         claim.totalTax += terrain.baseManpower * taxModifier;
                         claim.totalManpower += terrain.baseManpower * manpowerModifier;
+                    } else
+                    {
+                        Point coords = PixelHandler.getCoords(i,mapView.getWidth());
+
+                        Logger.logError("Unrecognized terrain color at index " + i + ", coords (" + coords.X + "," + coords.Y + "). Color: " + terrainPixel);
                     }
                 }
             }
         }
 
-        public void showInfoForPixel(int claimColor, int terrainColor, int regionColor, int occupationColor, int devastationColor)
+        private int findCity(int index, int limit)
+        {
+            ArrayList searchedIndexes = new ArrayList();
+
+            return findCity(index, limit, 0, ref searchedIndexes);
+        }
+
+        private int findCity(int index, int limit, int distance, ref ArrayList searchedIndexes)
+        {
+            if (cityList.ContainsKey(index))
+            {
+                return index;
+            }
+
+            if (distance + 1 > limit)
+            {
+                return -1;
+            }
+
+            int width = mapView.getWidth();
+            ArrayList nextIndexes = new ArrayList();
+
+            checkIndexForCityTerrain(index - 1, ref nextIndexes, ref searchedIndexes);
+            checkIndexForCityTerrain(index + 1, ref nextIndexes, ref searchedIndexes);
+            checkIndexForCityTerrain(index - width, ref nextIndexes, ref searchedIndexes);
+            checkIndexForCityTerrain(index + width, ref nextIndexes, ref searchedIndexes);
+
+            foreach(int nextIndex in nextIndexes)
+            {
+                int result = findCity(nextIndex, limit, distance + 1, ref searchedIndexes);
+
+                if (result != -1)
+                {
+                    return result;
+                }
+            }
+
+            return -1;
+        }
+
+        private void checkIndexForCityTerrain(int nextIndex, ref ArrayList nextIndexes, ref ArrayList searchedIndexes)
+        {
+            Terrain? t;
+            if (!searchedIndexes.Contains(nextIndex))
+            {
+                terrainList.TryGetValue(mapView.getTerrainAt(nextIndex), out t);
+                if (t != null && t.name.Equals("City"))
+                {
+                    nextIndexes.Add(nextIndex);
+                }
+            }
+
+            searchedIndexes.Add(nextIndex);
+        }
+
+        public void showInfoForPixel(int index, int claimColor, int terrainColor, int regionColor, int occupationColor, int devastationColor)
         {
             Claim? claim; claimList.TryGetValue(claimColor, out claim);
-            City? city; cityList.TryGetValue(terrainColor, out city);
+            Terrain? terrain; terrainList.TryGetValue(terrainColor, out terrain);
+            City? city = null; 
+            
+            if (terrain != null && terrain.name.Equals("City")) 
+            {
+                cityList.TryGetValue(findCity(index, 50), out city);
+            };
+
             Region? region; regionList.TryGetValue(regionColor, out region);
             Claim? occupier; claimList.TryGetValue(occupationColor, out occupier);
             double devastationPercentage = PixelHandler.getDevastation(devastationColor);

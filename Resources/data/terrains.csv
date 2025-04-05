@@ -1,11 +1,12 @@
 Grassland;359950;100
 River;354ca0;100
-Dryland;B29950;60
+Dryland;B29950;40
 Hill;99592f;30
 Forest;184424;20
-Steppe;94AF66;10
-Mountain;60361e;1
+Steppe;94AF66;5
+Mountain;60361e;0
 Tundra;86B7B2;0
 Tundra Hills;5B6482;0
 Desert;F7D36F;0
 Desert Hills;B76D45;0
+City;C4C4C4;1000

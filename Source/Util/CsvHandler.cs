@@ -11,8 +11,10 @@ namespace CoP_Viewer.Source.Util
 {
     internal class CsvHandler
     {
-        public static List<String[]> getValuesFromCSV(String content)
+        public static List<String[]> getValuesFromCSV(String path)
         {
+            string content = File.ReadAllText(path);
+
             var values = new List<String[]>();
 
             foreach (var line in content.Split("\r\n"))

@@ -77,7 +77,22 @@ namespace CoP_Viewer.Source.Util
                 }
             }
 
+            image.UnlockBits(bmpData);
+
             return pixels;
+        }
+
+        public static Point getCoords(int index, int width)
+        {
+            int y = index / width;
+            int x = index - width * y;
+
+            return new Point(x, y);
+        }
+
+        public static int getIndex(int x, int y, int width)
+        {
+            return y * width + x;
         }
     }
 }

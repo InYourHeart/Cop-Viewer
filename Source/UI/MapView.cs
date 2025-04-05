@@ -1,9 +1,13 @@
 ﻿using CoP_Viewer.Source.Controller;
+using CoP_Viewer.Source.Model;
 using CoP_Viewer.Source.Util;
+using System.Data.Common;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Runtime.InteropServices;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CoP_Viewer.Source.UI
 {
@@ -16,19 +20,24 @@ namespace CoP_Viewer.Source.UI
         private int[] occupationsImagePixels;
         private int[] devastationImagePixels;
 
-        public const string POLITICAL_KEY = "POLITICAL";
-        public const string TERRAIN_KEY = "TERRAIN";
-        public const string REGIONS_KEY = "REGIONS";
-        public const string OCCUPATIONS_KEY = "OCCUPATIONS";
-        public const string DEVASTATION_KEY = "DEVASTATION";
+        public const string POLITICAL_KEY = "political_map";
+        public const string TERRAIN_KEY = "terrain_map";
+        public const string REGIONS_KEY = "regions_map";
+        public const string OCCUPATIONS_KEY = "occupations_map";
+        public const string DEVASTATION_KEY = "devastation_map";
+
+        private Bitmap politicalMap;
+        private Bitmap terrainMap;
+        private Bitmap regionsMap;
+        private Bitmap occupationsMap;
+        private Bitmap devastationMap;
 
         //Controller
         private MapController mapController;
 
         //--------------Image manipulation values---------------------//
         // Active map image
-        private Bitmap backgroundMapImage;
-        private Bitmap overlayMapImage;
+        private string backgroundMapKey = POLITICAL_KEY;
         private string overlayKey = "";
         private float mapImageInnerRatio;
         private float mapImageToViewRatio;
@@ -61,16 +70,20 @@ namespace CoP_Viewer.Source.UI
         {
             this.BackColor = Color.White;
 
+            politicalMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[POLITICAL_KEY]);
+            terrainMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[TERRAIN_KEY]);
+            regionsMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[REGIONS_KEY]);
+            occupationsMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[OCCUPATIONS_KEY]);
+            devastationMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[DEVASTATION_KEY]);
+
             //Storing copies of the images' pixel arrays for later accesses
-            politicalImagePixels = PixelHandler.getPixels(Properties.Resources.PoliticalMap);
-            terrainImagePixels = PixelHandler.getPixels(Properties.Resources.TerrainMap);
-            regionsImagePixels = PixelHandler.getPixels(Properties.Resources.RegionMap);
-            occupationsImagePixels = PixelHandler.getPixels(Properties.Resources.OccupationMap);
-            devastationImagePixels = PixelHandler.getPixels(Properties.Resources.DevastationMap);
+            politicalImagePixels = PixelHandler.getPixels(politicalMap);
+            terrainImagePixels = PixelHandler.getPixels(terrainMap);
+            regionsImagePixels = PixelHandler.getPixels(regionsMap);
+            occupationsImagePixels = PixelHandler.getPixels(occupationsMap);
+            devastationImagePixels = PixelHandler.getPixels(devastationMap);
 
-            setMapImage(POLITICAL_KEY);
-
-            mapImageInnerRatio = (float)backgroundMapImage.Width / (float)backgroundMapImage.Height;
+            mapImageInnerRatio = (float)politicalMap.Width / (float)politicalMap.Height;
 
             this.DoubleBuffered = true;
 
@@ -85,37 +98,18 @@ namespace CoP_Viewer.Source.UI
             switch (key)
             {
                 case POLITICAL_KEY:
-                    backgroundMapImage = new Bitmap(Properties.Resources.PoliticalMap);
-                    break;
                 case TERRAIN_KEY:
-                    backgroundMapImage = new Bitmap(Properties.Resources.TerrainMap);
+                    backgroundMapKey = key;
                     break;
                 case REGIONS_KEY:
-                    if (overlayKey.Equals(REGIONS_KEY))
-                    {
-                        overlayKey = "";
-                        break;
-                    }
-                    overlayKey = REGIONS_KEY;
-                    overlayMapImage = new Bitmap(Properties.Resources.RegionMap);
-                    break;
                 case OCCUPATIONS_KEY:
-                    if (overlayKey.Equals(OCCUPATIONS_KEY))
-                    {
-                        overlayKey = "";
-                        break;
-                    }
-                    overlayKey = OCCUPATIONS_KEY;
-                    overlayMapImage = new Bitmap(Properties.Resources.OccupationMap);
-                    break;
                 case DEVASTATION_KEY:
-                    if (overlayKey.Equals(DEVASTATION_KEY))
+                    if (overlayKey.Equals(key))
                     {
                         overlayKey = "";
                         break;
                     }
-                    overlayKey = DEVASTATION_KEY;
-                    overlayMapImage = new Bitmap(Properties.Resources.DevastationMap);
+                    overlayKey = key;
                     break;
                 default:
                     break;
@@ -135,9 +129,9 @@ namespace CoP_Viewer.Source.UI
             this.Width = newWidth;
             this.Location = newLocation;
 
-            curImageX = (float)this.Width / 4f - ((float)this.Height / (float)backgroundMapImage.Height) * (float)this.Width;
+            curImageX = (float)this.Width / 4f - ((float)this.Height / (float)politicalMap.Height) * (float)this.Width;
 
-            mapImageToViewRatio = (float)this.Height / (float)backgroundMapImage.Height;
+            mapImageToViewRatio = (float)this.Height / (float)politicalMap.Height;
 
             this.Invalidate();
         }
@@ -145,7 +139,7 @@ namespace CoP_Viewer.Source.UI
         protected override void OnPaint(PaintEventArgs e)
         {
             //Conditions to avoid to proceed further.
-            if (backgroundMapImage == null) { return; }
+            if (backgroundMapKey == null) { return; }
 
             int curImageSizeX = (int)((float)this.initialHeight * mapImageInnerRatio * zoomFac);
             int curImageSizeY = (int)((float)this.initialHeight * zoomFac);
@@ -155,8 +149,7 @@ namespace CoP_Viewer.Source.UI
             g.CompositingMode = CompositingMode.SourceOver;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
 
-
-            float pixelSize = curImageSizeX / backgroundMapImage.Width;
+            float pixelSize = curImageSizeX / politicalMap.Width;
             Pen outlinePen = new Pen(Color.Black);
             outlinePen.Width = 0.025f * zoomFac;
 
@@ -167,19 +160,49 @@ namespace CoP_Viewer.Source.UI
                 curImageSizeX,
                 curImageSizeY);
 
-            g.DrawImage(backgroundMapImage,
-                        curImageX,
-                        curImageY,
-                        curImageSizeX,
-                        curImageSizeY);
-
-            if (!overlayKey.Equals(""))
+            switch (backgroundMapKey)
             {
-                g.DrawImage(overlayMapImage,
-                            curImageX,
-                            curImageY,
-                            curImageSizeX,
-                            curImageSizeY);
+                case TERRAIN_KEY:
+                    g.DrawImage(terrainMap,
+                    curImageX,
+                    curImageY,
+                    curImageSizeX,
+                    curImageSizeY);
+                    break;
+                default:
+                    g.DrawImage(politicalMap,
+                    curImageX,
+                    curImageY,
+                    curImageSizeX,
+                    curImageSizeY);
+                    break;
+            }
+
+            switch (overlayKey)
+            {
+                case REGIONS_KEY:
+                    g.DrawImage(regionsMap,
+                    curImageX,
+                    curImageY,
+                    curImageSizeX,
+                    curImageSizeY);
+                    break;
+                case DEVASTATION_KEY:
+                    g.DrawImage(devastationMap,
+                    curImageX,
+                    curImageY,
+                    curImageSizeX,
+                    curImageSizeY);
+                    break;
+                case OCCUPATIONS_KEY:
+                    g.DrawImage(occupationsMap,
+                    curImageX,
+                    curImageY,
+                    curImageSizeX,
+                    curImageSizeY);
+                    break;
+                default:
+                    break;
             }
 
             //Map view outline
@@ -215,10 +238,10 @@ namespace CoP_Viewer.Source.UI
             {
                 selectedPixelIndex = getOnArrayIndex(e.X, e.Y);
 
-                if (selectedPixelIndex.Value.X >= 0 && selectedPixelIndex.Value.X < backgroundMapImage.Width 
-                    && selectedPixelIndex.Value.Y >= 0 && selectedPixelIndex.Value.Y < backgroundMapImage.Height)
+                if (selectedPixelIndex.Value.X >= 0 && selectedPixelIndex.Value.X < politicalMap.Width
+                    && selectedPixelIndex.Value.Y >= 0 && selectedPixelIndex.Value.Y < politicalMap.Height)
                 {
-                    int index = selectedPixelIndex.Value.X + selectedPixelIndex.Value.Y * backgroundMapImage.Width;
+                    int index = selectedPixelIndex.Value.X + selectedPixelIndex.Value.Y * politicalMap.Width;
 
                     int claimColor = politicalImagePixels[index] & 0x00FFFFFF;
                     int terrainColor = terrainImagePixels[index] & 0x00FFFFFF;
@@ -226,7 +249,7 @@ namespace CoP_Viewer.Source.UI
                     int occupationColor = occupationsImagePixels[index] & 0x00FFFFFF;
                     int devastationColor = devastationImagePixels[index];
 
-                    mapController.showInfoForPixel(claimColor, terrainColor, regionColor, occupationColor, devastationColor);
+                    mapController.showInfoForPixel(index, claimColor, terrainColor, regionColor, occupationColor, devastationColor);
 
                     this.Invalidate();
                 }
@@ -237,6 +260,16 @@ namespace CoP_Viewer.Source.UI
             }
 
             isClicking = false;
+        }
+
+        public int getTerrainAt(int index)
+        {
+            return terrainImagePixels[index] & 0x00FFFFFF;
+        }
+
+        public int getWidth()
+        {
+            return politicalMap.Width;
         }
 
         private Point getOnArrayIndex(int x, int y)
@@ -250,9 +283,9 @@ namespace CoP_Viewer.Source.UI
             if (mouseX > -1 && mouseX < 0)
             {
                 indexX = -1;
-            } else if (mouseX > backgroundMapImage.Width && mouseX < backgroundMapImage.Width + 1)
+            } else if (mouseX > politicalMap.Width && mouseX < politicalMap.Width + 1)
             {
-                indexX = backgroundMapImage.Width + 1;
+                indexX = politicalMap.Width + 1;
             } else
             {
                 indexX = (int)Math.Round(mouseX);
@@ -262,9 +295,9 @@ namespace CoP_Viewer.Source.UI
             {
                 indexY = -1;
             }
-            else if (mouseY > backgroundMapImage.Height && mouseY < backgroundMapImage.Height + 1)
+            else if (mouseY > politicalMap.Height && mouseY < politicalMap.Height + 1)
             {
-                indexY = backgroundMapImage.Width + 1;
+                indexY = politicalMap.Width + 1;
             } else
             {
                 indexY = (int)Math.Round(mouseY);

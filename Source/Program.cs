@@ -22,6 +22,7 @@ namespace CoP_Viewer.Source
 
             MapController mapController = new(mapView, infoView);
 
+            Logger.logInfo("Application started");
             Application.Run(new MainForm(mapView, infoView));
         }
     }
