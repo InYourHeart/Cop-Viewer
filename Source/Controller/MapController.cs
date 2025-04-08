@@ -60,9 +60,10 @@ namespace CoP_Viewer.Source.Controller
             {
                 String terrainName = terrainData[0];
                 String terrainHex = terrainData[1];
-                int terrainBaseManpower = Int32.Parse(terrainData[2]);
+                int terrainBaseTax = Int32.Parse(terrainData[2]);
+                int terrainBaseManpower = Int32.Parse(terrainData[3]);
 
-                terrainList.Add(PixelHandler.hexToInt(terrainHex), new Terrain(terrainName, terrainHex, terrainBaseManpower));
+                terrainList.Add(PixelHandler.hexToInt(terrainHex), new Terrain(terrainName, terrainHex, terrainBaseTax, terrainBaseManpower));
             }
         }
 
@@ -170,7 +171,7 @@ namespace CoP_Viewer.Source.Controller
                             manpowerModifier *= devastationPercentage;
                         }
 
-                        claim.totalTax += terrain.baseManpower * taxModifier;
+                        claim.totalTax += terrain.baseTax * taxModifier;
                         claim.totalManpower += terrain.baseManpower * manpowerModifier;
                     } else
                     {
@@ -298,7 +299,7 @@ namespace CoP_Viewer.Source.Controller
             }
             else
             {
-                infoView.setPixelInfoViewEntryValue("Devastation", devastationPercentage.ToString("0.##"));
+                infoView.setPixelInfoViewEntryValue("Devastation", (devastationPercentage * 100).ToString("0.##"));
             }
         }
     }

@@ -34,7 +34,7 @@ namespace CoP_Viewer.Source.Util
             if (red == 255 & green == blue)
             {
                 double diff = red - green;
-                return (diff / red) * 100;
+                return (diff / red);
             }
 
             return -1;
