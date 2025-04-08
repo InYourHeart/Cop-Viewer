@@ -18,10 +18,10 @@ namespace CoP_Viewer.Source.Controller
         private Dictionary<int, City> cityList;
         private Dictionary<int, Region> regionList;
 
-        public const string CLAIMS_KEY = "claims_data";
-        public const string CITIES_KEY = "cities_data";
-        public const string REGIONS_KEY = "regions_data";
-        public const string TERRAINS_KEY = "terrains_data";
+        public const string CLAIMS_KEY = "Resources\\data\\claims.csv";
+        public const string CITIES_KEY = "Resources\\data\\cities.csv";
+        public const string REGIONS_KEY = "Resources\\data\\regions.csv";
+        public const string TERRAINS_KEY = "Resources\\data\\terrains.csv";
 
         public MapController(MapView mapView, InfoView infoView)
         {
@@ -45,7 +45,7 @@ namespace CoP_Viewer.Source.Controller
 
         public void loadClaimList()
         {
-            foreach (String[] claimData in CsvHandler.getValuesFromCSV(System.Configuration.ConfigurationManager.AppSettings[CLAIMS_KEY]))
+            foreach (String[] claimData in CsvHandler.getValuesFromCSV(AppDomain.CurrentDomain.BaseDirectory + CLAIMS_KEY))
             {
                 String claimName = claimData[0];
                 String claimHex = claimData[1];
@@ -56,7 +56,7 @@ namespace CoP_Viewer.Source.Controller
 
         public void loadTerrainList()
         {
-            foreach (String[] terrainData in CsvHandler.getValuesFromCSV(System.Configuration.ConfigurationManager.AppSettings[TERRAINS_KEY]))
+            foreach (String[] terrainData in CsvHandler.getValuesFromCSV(AppDomain.CurrentDomain.BaseDirectory + TERRAINS_KEY))
             {
                 String terrainName = terrainData[0];
                 String terrainHex = terrainData[1];
@@ -70,7 +70,7 @@ namespace CoP_Viewer.Source.Controller
         {
             int lineNum = 0;
 
-            foreach (String[] cityData in CsvHandler.getValuesFromCSV(System.Configuration.ConfigurationManager.AppSettings[CITIES_KEY]))
+            foreach (String[] cityData in CsvHandler.getValuesFromCSV(AppDomain.CurrentDomain.BaseDirectory + CITIES_KEY))
             {
                 lineNum++;
 
@@ -105,7 +105,7 @@ namespace CoP_Viewer.Source.Controller
 
         public void loadRegionList()
         {
-            foreach (String[] regionData in CsvHandler.getValuesFromCSV(System.Configuration.ConfigurationManager.AppSettings[REGIONS_KEY]))
+            foreach (String[] regionData in CsvHandler.getValuesFromCSV(AppDomain.CurrentDomain.BaseDirectory + REGIONS_KEY))
             {
                 String regionName = regionData[0];
                 String regionHex = regionData[1];

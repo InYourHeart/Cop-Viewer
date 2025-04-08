@@ -2,7 +2,7 @@
 {
     internal class Logger
     {
-        private static String LOG_PATH = "logs/app.log";
+        private static String LOG_PATH = "app.log";
 
         public static void logInfo(String msg)
         {

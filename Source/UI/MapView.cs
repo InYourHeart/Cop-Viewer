@@ -20,11 +20,11 @@ namespace CoP_Viewer.Source.UI
         private int[] occupationsImagePixels;
         private int[] devastationImagePixels;
 
-        public const string POLITICAL_KEY = "political_map";
-        public const string TERRAIN_KEY = "terrain_map";
-        public const string REGIONS_KEY = "regions_map";
-        public const string OCCUPATIONS_KEY = "occupations_map";
-        public const string DEVASTATION_KEY = "devastation_map";
+        public const string POLITICAL_KEY = "Resources\\maps\\political.png";
+        public const string TERRAIN_KEY = "Resources\\maps\\terrain.png";
+        public const string REGIONS_KEY = "Resources\\maps\\regions.png";
+        public const string OCCUPATIONS_KEY = "Resources\\maps\\occupations.png";
+        public const string DEVASTATION_KEY = "Resources\\maps\\devastation.png";
 
         private Bitmap politicalMap;
         private Bitmap terrainMap;
@@ -70,11 +70,11 @@ namespace CoP_Viewer.Source.UI
         {
             this.BackColor = Color.White;
 
-            politicalMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[POLITICAL_KEY]);
-            terrainMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[TERRAIN_KEY]);
-            regionsMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[REGIONS_KEY]);
-            occupationsMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[OCCUPATIONS_KEY]);
-            devastationMap = new Bitmap(System.Configuration.ConfigurationManager.AppSettings[DEVASTATION_KEY]);
+            politicalMap = new Bitmap(AppDomain.CurrentDomain.BaseDirectory + POLITICAL_KEY);
+            terrainMap = new Bitmap(AppDomain.CurrentDomain.BaseDirectory + TERRAIN_KEY);
+            regionsMap = new Bitmap(AppDomain.CurrentDomain.BaseDirectory + REGIONS_KEY);
+            occupationsMap = new Bitmap(AppDomain.CurrentDomain.BaseDirectory + OCCUPATIONS_KEY);
+            devastationMap = new Bitmap(AppDomain.CurrentDomain.BaseDirectory + DEVASTATION_KEY);
 
             //Storing copies of the images' pixel arrays for later accesses
             politicalImagePixels = PixelHandler.getPixels(politicalMap);
