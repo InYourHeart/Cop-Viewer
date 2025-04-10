@@ -3,6 +3,7 @@ using CoP_Viewer.Source.UI;
 using CoP_Viewer.Source.Util;
 using System;
 using System.Collections;
+using System.Globalization;
 using Claim = CoP_Viewer.Source.Model.Claim;
 using Region = CoP_Viewer.Source.Model.Region;
 
@@ -110,8 +111,8 @@ namespace CoP_Viewer.Source.Controller
             {
                 String regionName = regionData[0];
                 String regionHex = regionData[1];
-                double regionTaxModifier = Double.Parse(regionData[2].Replace(".", ","));
-                double regionManpowerModifier = Double.Parse(regionData[3].Replace(".", ","));
+                double regionTaxModifier = Double.Parse(regionData[2], CultureInfo.InvariantCulture);
+                double regionManpowerModifier = Double.Parse(regionData[3], CultureInfo.InvariantCulture);
 
                 regionList.Add(PixelHandler.hexToInt(regionHex), new Region(regionName, regionTaxModifier, regionManpowerModifier));
             }
@@ -299,7 +300,7 @@ namespace CoP_Viewer.Source.Controller
             }
             else
             {
-                infoView.setPixelInfoViewEntryValue("Devastation", (devastationPercentage * 100).ToString("0.##"));
+                infoView.setPixelInfoViewEntryValue("Devastation", (devastationPercentage * 100).ToString("0.##",CultureInfo.InvariantCulture));
             }
         }
     }
