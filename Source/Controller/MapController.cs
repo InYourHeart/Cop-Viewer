@@ -257,8 +257,8 @@ namespace CoP_Viewer.Source.Controller
             if (claim == null)
             {
                 infoView.setPixelInfoViewEntryValue("Claim", "None selected");
-                infoView.setPixelInfoViewEntryValue("Tax", null);
-                infoView.setPixelInfoViewEntryValue("Manpower", null);
+                infoView.setPixelInfoViewEntryValue("Tax", "");
+                infoView.setPixelInfoViewEntryValue("Manpower", "");
             }
             else
             {
@@ -269,7 +269,7 @@ namespace CoP_Viewer.Source.Controller
 
             if (city == null)
             {
-                infoView.setPixelInfoViewEntryValue("City", null);
+                infoView.setPixelInfoViewEntryValue("City", "");
             }
             else
             {
@@ -278,7 +278,7 @@ namespace CoP_Viewer.Source.Controller
 
             if (region == null)
             {
-                infoView.setPixelInfoViewEntryValue("Region", null);
+                infoView.setPixelInfoViewEntryValue("Region", "");
             }
             else
             {
@@ -287,7 +287,7 @@ namespace CoP_Viewer.Source.Controller
 
             if (occupier == null)
             {
-                infoView.setPixelInfoViewEntryValue("Occupied by", null);
+                infoView.setPixelInfoViewEntryValue("Occupied by", "");
             }
             else
             {
@@ -296,7 +296,7 @@ namespace CoP_Viewer.Source.Controller
 
             if (devastationPercentage == -1)
             {
-                infoView.setPixelInfoViewEntryValue("Devastation", null);
+                infoView.setPixelInfoViewEntryValue("Devastation", "");
             }
             else
             {

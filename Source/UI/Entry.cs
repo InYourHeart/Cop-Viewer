@@ -8,7 +8,7 @@
 
         public String Text;
 
-        public Entry(String key, String value, String prefix, String suffix)
+        public Entry(String key, String? value, String prefix, String suffix)
         {
             this.key = key;
             this.prefix = prefix == null ? "" : prefix;
@@ -22,7 +22,7 @@
             return key;
         }
 
-        public void setValue(String newValue)
+        public void setValue(String? newValue)
         {
             if (newValue == null)
             {
