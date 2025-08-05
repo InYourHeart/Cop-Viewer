@@ -1,6 +1,6 @@
 ﻿namespace CoP_Viewer.Source.Model
 {
-    internal class Claim
+    public class Claim
     {
         public String name;
         public double totalTax;

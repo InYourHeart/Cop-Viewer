@@ -9,7 +9,7 @@ using Region = CoP_Viewer.Source.Model.Region;
 
 namespace CoP_Viewer.Source.Controller
 {
-    internal class MapController
+    public class MapController
     {
         private MapView mapView;
         private InfoView infoView;
@@ -23,6 +23,8 @@ namespace CoP_Viewer.Source.Controller
         public const string CITIES_KEY = "Resources\\data\\cities.csv";
         public const string REGIONS_KEY = "Resources\\data\\regions.csv";
         public const string TERRAINS_KEY = "Resources\\data\\terrains.csv";
+
+        private SheetHandler sheetHandler;
 
         public MapController(MapView mapView, InfoView infoView)
         {
@@ -42,6 +44,8 @@ namespace CoP_Viewer.Source.Controller
             loadRegionList();
 
             calculateClaimValues();
+
+            this.sheetHandler = null;
         }
 
         public void loadClaimList()
@@ -302,6 +306,16 @@ namespace CoP_Viewer.Source.Controller
             {
                 infoView.setPixelInfoViewEntryValue("Devastation", (devastationPercentage * 100).ToString("0.##",CultureInfo.InvariantCulture));
             }
+        }
+
+        internal void TickSheets()
+        {
+            if (sheetHandler == null)
+            {
+                sheetHandler = new SheetHandler(claimList);
+            }
+
+            sheetHandler.TickSheets();
         }
     }
 }

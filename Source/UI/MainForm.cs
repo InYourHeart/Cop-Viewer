@@ -1,4 +1,6 @@
+using CoP_Viewer.Source.Controller;
 using CoP_Viewer.Source.UI;
+using CoP_Viewer.Source.Util;
 
 namespace CoP_Viewer
 {
@@ -18,12 +20,19 @@ namespace CoP_Viewer
         Button occupationsMapButton; 
         Button devastationMapButton;
 
-        public MainForm(MapView mapView, InfoView infoView)
+        Button tickSheetsButton;
+
+        //Controller
+        private MapController mapController;
+
+        public MainForm(MapView mapView, InfoView infoView, MapController mapController)
         {
             InitializeComponent();
 
             this.mapView = mapView;
             this.infoView = infoView;
+
+            this.mapController = mapController;
         }
 
         private void MapView_Load(object sender, EventArgs e)
@@ -53,6 +62,13 @@ namespace CoP_Viewer
             this.Controls.Add(occupationsMapButton);
             this.Controls.Add(devastationMapButton);
 
+            tickSheetsButton = new Button();
+            tickSheetsButton.Text = "Tick Sheets";
+            tickSheetsButton.Click += Tick_Sheets;
+
+            this.Controls.Add(tickSheetsButton);
+
+
             this.Height = (int)(Screen.FromControl(this).Bounds.Height * 0.9);
             this.Width = (int)(Screen.FromControl(this).Bounds.Width * 0.9);
             this.Location = new Point((int)(Screen.FromControl(this).Bounds.Width * 0.05),
@@ -61,6 +77,11 @@ namespace CoP_Viewer
             ResizeMapView();
             ResizeInfoView();
             ResizeMapButtons();
+        }
+
+        private void Tick_Sheets(object? sender, EventArgs e)
+        {
+            mapController.TickSheets();
         }
 
         private void Change_Map_To_Political(object? sender, EventArgs e)
@@ -118,6 +139,9 @@ namespace CoP_Viewer
             devastationMapButton.Height = h;
             devastationMapButton.Width = w;
             devastationMapButton.Location = new Point(newPosX + w * 4, newPosY);
+            tickSheetsButton.Height = h;
+            tickSheetsButton.Width = w;
+            tickSheetsButton.Location = new Point(newPosX, newPosY + h * 2);
         }
 
         private void ResizeMapView()
