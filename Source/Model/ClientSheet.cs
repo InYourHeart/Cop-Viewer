@@ -1,5 +1,5 @@
-﻿using Google.Apis.Sheets.v4.Data;
-using System;
+﻿using CoP_Viewer.Source.Util;
+using Google.Apis.Sheets.v4.Data;
 
 namespace CoP_Viewer.Source.Model
 {
@@ -29,6 +29,7 @@ namespace CoP_Viewer.Source.Model
         public double baseTax { get; set; }
         public double recruitManpowerBalance { get; set; }
         public double veteranManpowerBalance { get; set; }
+        public double masterSheetCurrentTick { get; set; }
 
         public List<string> GetBatchGetRanges()
         {
@@ -52,23 +53,8 @@ namespace CoP_Viewer.Source.Model
             return ranges;
         }
 
-        private ValueRange createCellValueRange(string range,object value)
-        {
-            ValueRange valueRange = new ValueRange();
-            valueRange.Range = range;
-            valueRange.Values = [new List<object>()];
-            valueRange.Values[0].Add(value);
-
-            return valueRange;
-        }
-
         public BatchUpdateValuesRequest GetBatchUpdateValuesRequest()
         {
-            if (responseValues == null)
-            {
-                throw new NullReferenceException("BatchGetValuesResponse was not previously set");
-            }
-
             var values = responseValues.ValueRanges;
             BatchUpdateValuesRequest request = new BatchUpdateValuesRequest();
             List<ValueRange> ranges = new List<ValueRange>();
@@ -76,7 +62,12 @@ namespace CoP_Viewer.Source.Model
             double oldPreviousBalance = Convert.ToDouble(values[0].Values[0][0]);
             double oldRevenues = Convert.ToDouble(values[1].Values[0][0]);
             double oldExpenditures = Convert.ToDouble(values[2].Values[0][0]);
-            double oldTick = Convert.ToDouble(values[4].Values[0][0]);
+            double oldTick = Convert.ToInt32(values[4].Values[0][0]);
+            if (oldTick != masterSheetCurrentTick)
+            {
+                throw new Exception("Client Sheet at " + url + " with Tick " + oldTick + " does not match Master Sheet with Tick " + masterSheetCurrentTick);
+            }
+
             double oldRecruitManpower = Convert.ToDouble(values[5].Values[0][0]);
             double oldVeteranManpower = Convert.ToDouble(values[6].Values[0][0]);
             ValueRange principalTotals = values[7];
@@ -85,10 +76,10 @@ namespace CoP_Viewer.Source.Model
             ValueRange oldPaymentsIncomingTicks = values[10];
             ValueRange oldPaymentsOutgoingTicks = values[11];
 
-            ranges.Add(createCellValueRange(SUMMARY_BUDGET_PREVIOUSBALANCE,oldPreviousBalance + oldRevenues - oldExpenditures));
-            ranges.Add(createCellValueRange(SUMMARY_REVENUES_TAX, baseTax));
-            ranges.Add(createCellValueRange(SUMMARY_RECRUITMANPOWER_TOTAL, oldRecruitManpower + recruitManpowerBalance * 0.05));
-            ranges.Add(createCellValueRange(SUMMARY_VETERANMANPOWER_TOTAL, oldVeteranManpower + veteranManpowerBalance * 0.05));
+            ranges.Add(SheetHandler.createCellValueRange(SUMMARY_BUDGET_PREVIOUSBALANCE, oldPreviousBalance + oldRevenues - oldExpenditures));
+            ranges.Add(SheetHandler.createCellValueRange(SUMMARY_REVENUES_TAX, baseTax));
+            ranges.Add(SheetHandler.createCellValueRange(SUMMARY_RECRUITMANPOWER_TOTAL, oldRecruitManpower + recruitManpowerBalance * 0.05));
+            ranges.Add(SheetHandler.createCellValueRange(SUMMARY_VETERANMANPOWER_TOTAL, oldVeteranManpower + veteranManpowerBalance * 0.05));
             
             ValueRange newPrincipalsPayingThisTick = new ValueRange();
             newPrincipalsPayingThisTick.Range = LOANS_PRINCIPAL_PAYINGTHISTICK;
@@ -109,6 +100,10 @@ namespace CoP_Viewer.Source.Model
                 else
                 {
                     double principalPayingThisTick = Convert.ToDouble(oldPrincipalPayingThisTick.Values[i][0]);
+                    if (principalPayingThisTick < 0)
+                    {
+                        throw new Exception("Principal paying this tick cannot be less than 0");
+                    }
                     newPrincipalsPaid.Values[i].Add(principalPaid + principalPayingThisTick);
                 }
 
@@ -151,7 +146,7 @@ namespace CoP_Viewer.Source.Model
             ranges.Add(newPaymentsIncomingTicks);
             ranges.Add(newPaymentsOutgoingTicks);
 
-            ranges.Add(createCellValueRange(SUMMARY_CURRENTTICK, oldTick + 1));
+            ranges.Add(SheetHandler.createCellValueRange(SUMMARY_CURRENTTICK, oldTick + 1));
 
             request.Data = ranges;
 

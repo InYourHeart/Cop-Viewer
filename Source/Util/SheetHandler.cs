@@ -9,7 +9,7 @@ namespace CoP_Viewer.Source.Util
     public class SheetHandler
     {
         private const string CREDENTIALS_KEY = "Credentials\\key.json";
-        private const string MASTER_SHEET_URL = "Credentials\\master_sheet_url.txt";
+        private const string MASTER_SHEET_URL_FILE = "Credentials\\master_sheet_url.txt";
 
         private SheetsService service;
 
@@ -26,53 +26,84 @@ namespace CoP_Viewer.Source.Util
             {
                 HttpClientInitializer = credential
             });
+            Logger.logInfo("Initialized SheetsService from file");
 
-            masterSheet = new MasterSheet(File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + MASTER_SHEET_URL));
+            var masterSheetURL = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + MASTER_SHEET_URL_FILE);
+            masterSheet = new MasterSheet(masterSheetURL);
+            Logger.logInfo("Set Master Sheet from file at URL " + masterSheetURL);
 
             clientSheets = null;
             this.claimList = claimList;
+            Logger.logInfo("SheetHandler initialized");
         }
 
-        public bool TickSheets()
+        public SheetHandler()
         {
-            Logger.logInfo("Starting tick");
+            //TODO Google sheets initialization
+            throw new NotImplementedException();
+        }
 
-            if (clientSheets == null) {
-                GetClientSheetsURL();
-            }
+        public void TickSheets()
+        {
+            Logger.logInfo("Starting tick...");
 
-            if (clientSheets == null)
-            {
-                return false;
-            }
+            //Get the values for all the sheets before making updates to any for validation.
+            //We don't want the Tick to stop midway and leave some sheets updated and others not.
+            masterSheet.responseValues = BatchGet(masterSheet.url, new List<string> { masterSheet.CurrentTickCell() });
+            BatchUpdateValuesRequest masterSheetUpdateValues = masterSheet.GetBatchUpdateValuesRequest();
+
+            GetClientSheetsInfo();
+
+            List<BatchUpdateValuesRequest> updateValuesList = new List<BatchUpdateValuesRequest>();
 
             foreach(ClientSheet sheet in clientSheets)
             {
+                //Null is a valid value for client sheet URLs, usually when the claim is an NPC, so we don't want to throw an Exception
                 if (sheet.url != null && !sheet.url.Equals("null"))
                 {
-                    //Retrieve ClientSheet values
                     sheet.responseValues = BatchGet(sheet.url, sheet.GetBatchGetRanges());
 
-                    if (BatchUpdate(sheet.url, sheet.GetBatchUpdateValuesRequest()))
+                    updateValuesList.Add(sheet.GetBatchUpdateValuesRequest());
+                }
+            }
+
+            //Update the master sheet
+            if (BatchUpdate(masterSheet.url, masterSheetUpdateValues))
+            {
+                Logger.logInfo("Updated master sheet " + masterSheet.url);
+            }
+            else
+            {
+                Logger.logInfo("Failed to update master sheet " + masterSheet.url);
+            }
+
+            //Update the client sheets
+            for (int i = 0; i < clientSheets.Count; i++)
+            {
+                ClientSheet sheet = clientSheets[i];
+
+                //Skipping over nulls in the same way will match client sheets with their respective entry in updateValuesList
+                if (sheet.url != null && !sheet.url.Equals("null"))
+                {
+                    if (BatchUpdate(sheet.url, updateValuesList[i]))
                     {
-                        Logger.logInfo("Updated sheet " +  sheet.url);
-                    } else
+                        Logger.logInfo("Updated sheet " + sheet.url);
+                    }
+                    else
                     {
                         Logger.logInfo("Failed to update sheet " + sheet.url);
                     }
                 }
             }
-
-            return true;
         }
 
-        private bool GetClientSheetsURL()
+        private bool GetClientSheetsInfo()
         {
             Logger.logInfo("Retrieving client sheets URLs from Master Sheet at URL " + masterSheet.url);
 
             clientSheets = new List<ClientSheet>();
 
-            BatchGetValuesResponse? response = BatchGet(masterSheet.url, masterSheet.ClientSheetURLs());
+            BatchGetValuesResponse? response = BatchGet(masterSheet.url, masterSheet.ClientSheetsRanges());
 
             if (response == null)
             {
@@ -83,15 +114,16 @@ namespace CoP_Viewer.Source.Util
             for (int i = 2; i < response.ValueRanges[0].Values.Count; i++)
             {
                 string? claimKey = response.ValueRanges[0].Values[i][0].ToString();
-                string? sheetURL = response.ValueRanges[1].Values[i][0].ToString();
-                double recruitCasualties = Convert.ToDouble(response.ValueRanges[2].Values[i][0].ToString());
-                double veteranCasualties = Convert.ToDouble(response.ValueRanges[3].Values[i][0].ToString());
+                string? claimName = response.ValueRanges[1].Values[i][0].ToString();
+                string? sheetURL = response.ValueRanges[2].Values[i][0].ToString();
+                double recruitCasualties = Convert.ToDouble(response.ValueRanges[3].Values[i][0].ToString());
+                double veteranCasualties = Convert.ToDouble(response.ValueRanges[4].Values[i][0].ToString());
 
                 if (claimKey != null && sheetURL != null && !sheetURL.Equals("null"))
                 {
                     int hexKey = PixelHandler.hexToInt(claimKey);
 
-                    Logger.logInfo("Retrived client sheet URL - Claim name: " + claimKey + ", URL: " + sheetURL);
+                    Logger.logInfo("Retrieved client sheet URL - Claim name: " + claimName + ", URL: " + sheetURL);
                     Claim c;
                     claimList.TryGetValue(hexKey, out c);
                     ClientSheet cs = new ClientSheet();
@@ -100,6 +132,7 @@ namespace CoP_Viewer.Source.Util
                     cs.baseTax = c.totalTax;
                     cs.recruitManpowerBalance = c.totalManpower * 0.08 - recruitCasualties;
                     cs.veteranManpowerBalance = c.totalManpower * 0.02 - veteranCasualties;
+                    cs.masterSheetCurrentTick = masterSheet.currentTick;
 
                     clientSheets.Add(cs);
                 }
@@ -179,6 +212,16 @@ namespace CoP_Viewer.Source.Util
                 Logger.logError("BatchUpdate - " + ex.Message);
                 return false;
             }
+        }
+
+        public static ValueRange createCellValueRange(string range, object value)
+        {
+            ValueRange valueRange = new ValueRange();
+            valueRange.Range = range;
+            valueRange.Values = [new List<object>()];
+            valueRange.Values[0].Add(value);
+
+            return valueRange;
         }
     }
 }

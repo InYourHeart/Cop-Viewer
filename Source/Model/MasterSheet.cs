@@ -1,4 +1,9 @@
-﻿namespace CoP_Viewer.Source.Model
+﻿using CoP_Viewer.Source.Util;
+using Google.Apis.Sheets.v4.Data;
+using Newtonsoft.Json.Linq;
+using System;
+
+namespace CoP_Viewer.Source.Model
 {
     public class MasterSheet
     {
@@ -30,14 +35,42 @@
 
         public string url { get; set; }
 
+        public double currentTick { get; set; }
+
+        public BatchGetValuesResponse? responseValues { get; set; }
+
         public MasterSheet(string url)
         {
             this.url = url;
         }
 
-        public List<string> ClientSheetURLs()
+        public string CurrentTickCell()
         {
-            return [CLAIM_HEX, CLAIM_SHEET_URL, CLAIM_RECRUITCASUALTIES, CLAIM_VETERANCASUALTIES];
+            return GLOBAL_CURRENT_TICK;
+        }
+
+        public List<string> ClientSheetsRanges()
+        {
+            return [CLAIM_HEX, CLAIM_NAME, CLAIM_SHEET_URL, CLAIM_RECRUITCASUALTIES, CLAIM_VETERANCASUALTIES];
+        }
+
+        public BatchUpdateValuesRequest GetBatchUpdateValuesRequest()
+        {
+            var values = responseValues.ValueRanges;
+            BatchUpdateValuesRequest request = new BatchUpdateValuesRequest();
+            List<ValueRange> ranges = new List<ValueRange>();
+
+            currentTick = Convert.ToDouble(values[0].Values[0][0]);
+
+            if (currentTick < 1) {
+                throw new IndexOutOfRangeException("Master sheet current tick cannot be less than 1");
+            }
+
+            ranges.Add(SheetHandler.createCellValueRange(GLOBAL_CURRENT_TICK, currentTick + 1));
+
+            request.Data = ranges;
+
+            return request;
         }
     }
 }

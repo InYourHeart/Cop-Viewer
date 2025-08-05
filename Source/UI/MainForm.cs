@@ -81,7 +81,13 @@ namespace CoP_Viewer
 
         private void Tick_Sheets(object? sender, EventArgs e)
         {
-            mapController.TickSheets();
+            try {
+                mapController.TickSheets(); 
+            } catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
 
         private void Change_Map_To_Political(object? sender, EventArgs e)
